@@ -306,6 +306,17 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
         
         # Parse JSON response with improved error handling
         response_text = result['text'].strip()
+        import re
+        # Strip markdown backticks
+        if '```' in response_text:
+            parts = response_text.split('```')
+            for part in parts:
+                p = part.strip().lstrip('json').strip()
+                if p.startswith('{'):
+                    response_text = p
+                    break
+        # Remove control characters
+        response_text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', ' ', response_text).strip()
         print(f"[GROQ RAW RESPONSE] First 500 chars: {response_text[:500]}...")
         
         # Try to parse JSON with multiple fallback strategies
