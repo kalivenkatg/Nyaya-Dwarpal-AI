@@ -1,65 +1,39 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-venv/
-ENV/
-env/
+# Environment files
+.env
+.env.*
+*.env
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# AWS CDK
+# AWS
+.aws/
 cdk.out/
 .cdk.staging/
-cdk.context.json
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
 
-# Environment
-.env
-.env.local
+# Binary/compiled extensions - too large for GitHub
+*.so
+*.dylib
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.hypothesis/
+# Python virtual environments
+venv/
+.venv/
+node_modules/
+
+# Logs
+logs/
+*.log
 
 # OS
 .DS_Store
-Thumbs.db
 
-# Archives and logs
+# Large dependency folders already in Lambda layers
+lambda_functions/shared/python/
+lambda_functions/audio_transcribe/python/
+lambda_functions/document_verifier/PIL/
+lambda_functions/document_verifier/lxml/
+
+# Archives
 archives/
-logs/
-
-# Test outputs
-tests/*.log
-tests/deployment.log

@@ -183,133 +183,167 @@ class BedrockClient:
     ) -> str:
         """
         Build prompt for legal problem triage and classification
-        
+
         Args:
             transcribed_text: User's grievance in their native language
-            language: Language code (e.g., 'hi' for Hindi, 'ta' for Tamil)
+            language: Language code (e.g., 'en' for English, 'hi' for Hindi, 'ta' for Tamil)
             use_native_script: If True, use native script; if False, use romanized text
-            
+
         Returns:
-            Formatted prompt for Bedrock
+            Formatted prompt for Groq
         """
-        # Build language instruction based on script preference
-        if use_native_script:
-            language_instruction = f"""YOU MUST RESPOND ONLY IN {language} NATIVE SCRIPT.
+        # Language name mapping
+        language_map = {
+            'en': {'name': 'English', 'script': 'Latin script'},
+            'hi': {'name': 'Hindi', 'script': 'Devanagari script (देवनागरी अक्षर)'},
+            'te': {'name': 'Telugu', 'script': 'Telugu script (తెలుగు అక్షరాలు)'},
+            'ta': {'name': 'Tamil', 'script': 'Tamil script (தமிழ் எழுத்துக்கள்)'},
+            'bn': {'name': 'Bengali', 'script': 'Bengali script (বাংলা লিপি)'},
+            'mr': {'name': 'Marathi', 'script': 'Devanagari script (देवनागरी अक्षर)'},
+            'gu': {'name': 'Gujarati', 'script': 'Gujarati script (ગુજરાતી લિપિ)'},
+            'kn': {'name': 'Kannada', 'script': 'Kannada script (ಕನ್ನಡ ಲಿಪಿ)'},
+            'ml': {'name': 'Malayalam', 'script': 'Malayalam script (മലയാളം ലിപി)'},
+            'pa': {'name': 'Punjabi', 'script': 'Gurmukhi script (ਗੁਰਮੁਖੀ ਲਿਪੀ)'},
+        }
 
-For Telugu: Use ONLY తెలుగు అక్షరాలు (Telugu Unicode characters like తెలుగు).
-For Hindi: Use ONLY देवनागरी अक्षर.
-For Tamil: Use ONLY தமிழ் எழுத்துக்கள்.
+        lang_info = language_map.get(language, {'name': language, 'script': 'native script'})
+        language_name = lang_info['name']
+        script_name = lang_info['script']
 
-ABSOLUTELY NO English or Roman letters in your response content. JSON keys must stay in English but ALL values must be in native script."""
+        # Build language instruction based on language and script preference
+        if language == 'en':
+            # English - no native script confusion
+            language_instruction = """Respond in clear, professional English.
+
+    JSON keys must be in English. All content values must be in English."""
+            language_reminder = ""
+        elif use_native_script:
+            # Non-English with native script
+            language_instruction = f"""YOU MUST RESPOND ONLY IN {language_name.upper()} USING {script_name.upper()}.
+
+    For {language_name}: Use ONLY {script_name}.
+
+    ABSOLUTELY NO English or Roman letters in your response content. JSON keys must stay in English but ALL values must be in {script_name}."""
             language_reminder = f"""
 
-REMINDER: YOU MUST RESPOND ONLY IN {language} NATIVE SCRIPT. For Telugu use ONLY తెలుగు అక్షరాలు. For Hindi use ONLY देवनागरी अक्षर. For Tamil use ONLY தமிழ் எழுத்துக்கள். ABSOLUTELY NO English or Roman letters in response values."""
+    REMINDER: YOU MUST RESPOND ONLY IN {language_name.upper()} USING {script_name.upper()}. ABSOLUTELY NO English or Roman letters in response values."""
         else:
-            language_instruction = f"""Respond in {language} using English/Roman letters (romanized/transliterated text)."""
+            # Non-English with romanized text
+            language_instruction = f"""Respond in {language_name} using English/Roman letters (romanized/transliterated text).
+
+    JSON keys must be in English. All content values must be in romanized {language_name}."""
             language_reminder = ""
-        
+
         return f"""{language_instruction}
-You are an expert Indian lawyer with 20+ years of experience. A client has come to you with this legal issue:
 
-CLIENT'S ISSUE (in {language}):
-"{transcribed_text}"
+    You are an expert Indian lawyer with 20+ years of experience. A client has come to you with this legal issue:
 
-Your job is to provide EXTREMELY DETAILED, ACTIONABLE legal advice that the client can act on IMMEDIATELY. Do NOT give generic advice like "consult a lawyer" - that's useless. Give SPECIFIC steps they can take TODAY.
+    CLIENT'S ISSUE (in {language_name}):
+    "{transcribed_text}"
 
-ANALYZE AND CATEGORIZE:
+    Your job is to provide EXTREMELY DETAILED, ACTIONABLE legal advice that the client can act on IMMEDIATELY. Do NOT give generic advice like "consult a lawyer" - that's useless. Give SPECIFIC steps they can take TODAY.
 
-1. LEGAL CATEGORY (choose most specific):
-   - Employment Law - Unpaid Wages: salary, wages not paid, employer owes money
-   - Employment Law - Wrongful Termination: fired, terminated, dismissed without cause
-   - Employment Law - Workplace Harassment: harassment, discrimination, hostile environment
-   - Property Law - Tenant Rights: landlord issues, eviction, rent disputes, maintenance
-   - Property Law - Property Disputes: boundary disputes, illegal construction, encroachment
-   - Consumer Rights - Defective Products: faulty goods, warranty issues, refund denied
-   - Consumer Rights - Service Deficiency: poor service, overcharging, fraud by seller
-   - Family Law - Divorce: marriage dissolution, separation, alimony
-   - Family Law - Child Custody: custody disputes, visitation rights
-   - Family Law - Domestic Violence: abuse, threats, protection needed
-   - Criminal Law - Theft/Fraud: stolen property, cheating, financial fraud
-   - Criminal Law - Assault: physical violence, threats, intimidation
-   - Contract Law - Breach: agreement violated, payment not received, contract dispute
-   - Civil Disputes - Damages: compensation for injury, negligence, accident
-   - Other: only if truly doesn't fit above
+    ANALYZE AND CATEGORIZE:
 
-2. URGENCY LEVEL:
-   - HIGH: Unpaid salary 2+ months, eviction notice, domestic violence, immediate threat, legal deadline within 30 days
-   - MEDIUM: Defective product, contract dispute, property maintenance, delayed payment
-   - LOW: General consultation, information request, minor disputes
+    1. LEGAL CATEGORY (choose most specific - DO NOT use "Other" unless absolutely necessary):
+       - Employment Law - Unpaid Wages: salary, wages not paid, employer owes money
+       - Employment Law - Wrongful Termination: fired, terminated, dismissed without cause
+       - Employment Law - Workplace Harassment: harassment, discrimination, hostile environment
+       - Property Law - Tenant Rights: landlord issues, eviction, rent disputes, maintenance
+       - Property Law - Property Disputes: boundary disputes, illegal construction, encroachment
+       - Consumer Rights - Defective Products: faulty goods, warranty issues, refund denied
+       - Consumer Rights - Service Deficiency: poor service, overcharging, fraud by seller
+       - Family Law - Divorce: marriage dissolution, separation, alimony
+       - Family Law - Child Custody: custody disputes, visitation rights
+       - Family Law - Domestic Violence: abuse, threats, protection needed
+       - Criminal Law - Theft/Fraud: stolen property, cheating, financial fraud
+       - Criminal Law - Assault: physical violence, threats, intimidation
+       - Contract Law - Breach: agreement violated, payment not received, contract dispute
+       - Civil Disputes - Damages: compensation for injury, negligence, accident
+       - Other: ONLY if truly doesn't fit any category above
 
-3. PROVIDE EXTREMELY DETAILED ADVICE:
+    2. URGENCY LEVEL:
+       - HIGH: Unpaid salary 2+ months, eviction notice, domestic violence, immediate threat, legal deadline within 30 days
+       - MEDIUM: Defective product, contract dispute, property maintenance, delayed payment
+       - LOW: General consultation, information request, minor disputes
 
-Your response MUST include:
+    3. PROVIDE EXTREMELY DETAILED ADVICE:
 
-A. IMMEDIATE ACTIONS (What to do in next 24-48 hours):
-   - Specific documents to gather (with examples)
-   - Evidence to collect (photos, recordings, witnesses)
-   - People to contact (with phone numbers/websites if possible)
+    Your response MUST include:
 
-B. STEP-BY-STEP LEGAL PROCESS (Timeline-based):
-   - DAY 1-3: First actions
-   - WEEK 1: Legal notice/complaint filing
-   - WEEK 2-4: Follow-up actions
-   - MONTH 2+: Court proceedings if needed
+    A. IMMEDIATE ACTIONS (What to do in next 24-48 hours):
+       - Specific documents to gather (with examples)
+       - Evidence to collect (photos, recordings, witnesses)
+       - People to contact (with phone numbers/websites if possible)
 
-C. WHERE TO FILE COMPLAINTS:
-   - Exact office names (Labour Commissioner, Consumer Forum, Police Station, etc.)
-   - Online portals (with URLs like shramsuvidha.gov.in, consumerhelpline.gov.in)
-   - Physical addresses if known
-   - Free vs paid options
+    B. STEP-BY-STEP LEGAL PROCESS (Timeline-based):
+       - DAY 1-3: First actions
+       - WEEK 1: Legal notice/complaint filing
+       - WEEK 2-4: Follow-up actions
+       - MONTH 2+: Court proceedings if needed
 
-D. COST BREAKDOWN:
-   - Legal notice: ₹2,000-5,000
-   - Court filing fees: ₹500-2,000
-   - Lawyer fees: ₹10,000-50,000 (range based on complexity)
-   - FREE options: Legal aid, government helplines, online complaints
+    C. WHERE TO FILE COMPLAINTS:
+       - Exact office names (Labour Commissioner, Consumer Forum, Police Station, etc.)
+       - Online portals (with URLs like shramsuvidha.gov.in, consumerhelpline.gov.in)
+       - Physical addresses if known
+       - Free vs paid options
 
-E. TIMELINE:
-   - Best case: X days/weeks
-   - Average case: X months
-   - Worst case: X months/years
+    D. COST BREAKDOWN:
+       - Legal notice: ₹2,000-5,000
+       - Court filing fees: ₹500-2,000
+       - Lawyer fees: ₹10,000-50,000 (range based on complexity)
+       - FREE options: Legal aid, government helplines, online complaints
 
-F. LEGAL RIGHTS & LAWS:
-   - Specific Act names (Payment of Wages Act 1936, Consumer Protection Act 2019, etc.)
-   - Section numbers (Section 5, Section 35, etc.)
-   - What the law says in simple language
-   - Penalties for violator
+    E. TIMELINE:
+       - Best case: X days/weeks
+       - Average case: X months
+       - Worst case: X months/years
 
-G. COMPENSATION/REMEDY:
-   - What client can claim (money, possession, injunction, etc.)
-   - How much (specific amounts or formulas)
-   - Interest rates (typically 9-15% per annum)
+    F. LEGAL RIGHTS & LAWS:
+       - Specific Act names (Payment of Wages Act 1936, Consumer Protection Act 2019, etc.)
+       - Section numbers (Section 5, Section 35, etc.)
+       - What the law says in simple language
+       - Penalties for violator
 
-H. FREE RESOURCES:
-   - State Legal Services Authority (free lawyers)
-   - Government helplines (with numbers)
-   - Online complaint portals
-   - NGOs that can help
+    G. COMPENSATION/REMEDY:
+       - What client can claim (money, possession, injunction, etc.)
+       - How much (specific amounts or formulas)
+       - Interest rates (typically 9-15% per annum)
 
-I. WARNINGS/CAUTIONS:
-   - Time limits (statute of limitations)
-   - Documents NOT to sign
-   - Common mistakes to avoid
-   - When to definitely hire a lawyer
+    H. FREE RESOURCES:
+       - State Legal Services Authority (free lawyers)
+       - Government helplines (with numbers)
+       - Online complaint portals
+       - NGOs that can help
 
-Respond in JSON format with these EXACT keys:
-{{
-  "category": "Employment Law - Unpaid Wages",
-  "subCategory": "Salary not paid for 3 months",
-  "urgency": "high",
-  "urgencyReason": "Detailed explanation of why this is urgent with legal basis",
-  "emotionalState": "distressed",
-  "facts": {{
+    I. WARNINGS/CAUTIONS:
+       - Time limits (statute of limitations)
+       - Documents NOT to sign
+       - Common mistakes to avoid
+       - When to definitely hire a lawyer
+
+    CRITICAL INSTRUCTIONS:
+    - Your recommendation MUST be at least 500 words with specific, actionable steps
+    - DO NOT give generic advice
+    - Be as detailed as a real lawyer consultation
+    - Choose the MOST SPECIFIC category - avoid "Other"
+    - Return ONLY valid JSON - NO markdown backticks, NO preamble, NO extra text
+
+    Respond in JSON format with these EXACT keys:
+    {{
+      "category": "Employment Law - Unpaid Wages",
+      "subCategory": "Salary not paid for 3 months",
+      "urgency": "high",
+      "urgencyReason": "Detailed explanation of why this is urgent with legal basis",
+      "emotionalState": "distressed",
+      "facts": {{
     "who": "employer and employee",
     "what": "unpaid salary",
     "when": "3 months",
     "where": "workplace location if mentioned",
     "amount": "monetary value if mentioned"
-  }},
-  "legalSections": [
+      }},
+      "legalSections": [
     {{
       "act": "Payment of Wages Act, 1936",
       "section": "Section 5",
@@ -317,28 +351,28 @@ Respond in JSON format with these EXACT keys:
       "penalty": "Fine up to ₹3,750 + compensation to employee",
       "remedy": "Can claim full wages + interest + compensation"
     }}
-  ],
-  "recommendation": "EXTREMELY DETAILED multi-paragraph advice with specific steps, timelines, costs, and resources. Include:\n\n1. IMMEDIATE ACTIONS (Next 24-48 hours):\n- Gather X, Y, Z documents\n- Contact A, B, C people\n- Preserve evidence by doing X\n\n2. LEGAL PROCESS (Week by week):\n- Week 1: Send legal notice via lawyer (₹2,000-5,000)\n- Week 2: File complaint at Labour Commissioner (FREE)\n- Week 3-4: Attend hearing\n- Month 2+: Labour Court if needed\n\n3. WHERE TO GO:\n- Labour Commissioner Office: [address/website]\n- Online complaint: shramsuvidha.gov.in\n- Free legal aid: State Legal Services Authority\n\n4. YOUR RIGHTS:\n- Under Section X of Act Y, you are entitled to Z\n- Employer faces penalty of A if found guilty\n- You can claim B + C + D\n\n5. COSTS:\n- Legal notice: ₹X\n- Filing fees: ₹Y (or FREE at Labour Commissioner)\n- Lawyer: ₹Z (or FREE via legal aid)\n\n6. TIMELINE:\n- Labour Commissioner: 1-3 months\n- Labour Court: 6-12 months\n- High Court appeal: 1-2 years\n\n7. FREE RESOURCES:\n- [Resource 1]: [How to access]\n- [Resource 2]: [Contact details]\n\n8. WARNINGS:\n- File within X days or you lose right to claim\n- Don't sign any settlement without lawyer review\n- Keep all original documents safe",
-  "nextSteps": [
+      ],
+      "recommendation": "EXTREMELY DETAILED multi-paragraph advice with specific steps, timelines, costs, and resources. Include:\\n\\n1. IMMEDIATE ACTIONS (Next 24-48 hours):\\n- Gather X, Y, Z documents\\n- Contact A, B, C people\\n- Preserve evidence by doing X\\n\\n2. LEGAL PROCESS (Week by week):\\n- Week 1: Send legal notice via lawyer (₹2,000-5,000)\\n- Week 2: File complaint at Labour Commissioner (FREE)\\n- Week 3-4: Attend hearing\\n- Month 2+: Labour Court if needed\\n\\n3. WHERE TO GO:\\n- Labour Commissioner Office: [address/website]\\n- Online complaint: shramsuvidha.gov.in\\n- Free legal aid: State Legal Services Authority\\n\\n4. YOUR RIGHTS:\\n- Under Section X of Act Y, you are entitled to Z\\n- Employer faces penalty of A if found guilty\\n- You can claim B + C + D\\n\\n5. COSTS:\\n- Legal notice: ₹X\\n- Filing fees: ₹Y (or FREE at Labour Commissioner)\\n- Lawyer: ₹Z (or FREE via legal aid)\\n\\n6. TIMELINE:\\n- Labour Commissioner: 1-3 months\\n- Labour Court: 6-12 months\\n- High Court appeal: 1-2 years\\n\\n7. FREE RESOURCES:\\n- [Resource 1]: [How to access]\\n- [Resource 2]: [Contact details]\\n\\n8. WARNINGS:\\n- File within X days or you lose right to claim\\n- Don't sign any settlement without lawyer review\\n- Keep all original documents safe",
+      "nextSteps": [
     "TODAY: Collect employment contract, salary slips, bank statements showing no deposits",
     "DAY 2: Visit State Legal Services Authority for free lawyer consultation",
     "DAY 3: Lawyer sends legal notice to employer demanding payment within 7 days",
     "DAY 10: If no response, file written complaint at Labour Commissioner office (FREE)",
     "DAY 30: Attend Labour Commissioner hearing with all documents",
     "DAY 60: If unresolved, file case in Labour Court with lawyer"
-  ],
-  "requiredDocuments": [
+      ],
+      "requiredDocuments": [
     "Employment contract or appointment letter",
     "Salary slips for last 6 months",
     "Bank statements showing salary deposits (or lack thereof)",
     "Email/WhatsApp correspondence with employer about salary",
     "Any written warnings or termination letters",
     "Identity proof (Aadhaar, PAN card)"
-  ],
-  "estimatedCost": "Legal notice: ₹2,000-5,000, Labour Commissioner: FREE, Labour Court filing: ₹500-1,000, Lawyer fees: ₹10,000-25,000 (or FREE via legal aid for cases under ₹5 lakhs)",
-  "timeline": "1-3 months via Labour Commissioner (fastest route), 6-12 months if case goes to Labour Court, 1-2 years if appeals to High Court",
-  "severity": "high",
-  "resources": [
+      ],
+      "estimatedCost": "Legal notice: ₹2,000-5,000, Labour Commissioner: FREE, Labour Court filing: ₹500-1,000, Lawyer fees: ₹10,000-25,000 (or FREE via legal aid for cases under ₹5 lakhs)",
+      "timeline": "1-3 months via Labour Commissioner (fastest route), 6-12 months if case goes to Labour Court, 1-2 years if appeals to High Court",
+      "severity": "high",
+      "resources": [
     {{
       "name": "Labour Commissioner Office",
       "action": "File free complaint at nearest office. Find location: https://labour.gov.in/",
@@ -357,15 +391,11 @@ Respond in JSON format with these EXACT keys:
       "cost": "FREE online complaint system",
       "timeline": "Response within 30 days"
     }}
-  ],
-  "legalDisclaimer": "This advice is AI-generated for informational purposes only. Please consult a qualified legal professional before taking any action. Laws may vary by state."
-}}
+      ],
+      "legalDisclaimer": "This advice is AI-generated for informational purposes only. Please consult a qualified legal professional before taking any action. Laws may vary by state."
+    }}
+    {language_reminder}"""
 
-CRITICAL: Your recommendation MUST be at least 500 words with specific, actionable steps. Do NOT give generic advice. Be as detailed as a real lawyer consultation.
-
-{language_reminder}
-
-Respond with ONLY the JSON object, no markdown formatting."""
     
     def build_petition_generation_prompt(
         self,

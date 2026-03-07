@@ -304,18 +304,56 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
         print(f"Groq response received. Length: {len(result['text'])} characters")
         print(f"Token usage: {result.get('usage', {})}")
         
-        # Parse JSON response
+        # Parse JSON response with improved error handling
         response_text = result['text'].strip()
-        print(f"Bedrock response preview: {response_text[:500]}...")
+        print(f"[GROQ RAW RESPONSE] First 500 chars: {response_text[:500]}...")
         
-        # Remove markdown code blocks if present
-        if response_text.startswith('```'):
-            response_text = response_text.split('```')[1]
-            if response_text.startswith('json'):
-                response_text = response_text[4:]
-            response_text = response_text.rsplit('```', 1)[0]
+        # Try to parse JSON with multiple fallback strategies
+        classification = None
+        parse_attempts = []
         
-        classification = json.loads(response_text)
+        # Attempt 1: Direct parse
+        try:
+            classification = json.loads(response_text)
+            print("[JSON PARSE] Success on direct parse")
+        except json.JSONDecodeError as e:
+            parse_attempts.append(f"Direct parse failed: {str(e)}")
+            
+            # Attempt 2: Remove markdown code blocks
+            try:
+                cleaned = response_text
+                if cleaned.startswith('```'):
+                    # Remove opening ```json or ```
+                    cleaned = cleaned.split('```', 1)[1]
+                    if cleaned.startswith('json'):
+                        cleaned = cleaned[4:].strip()
+                    # Remove closing ```
+                    if '```' in cleaned:
+                        cleaned = cleaned.rsplit('```', 1)[0].strip()
+                
+                classification = json.loads(cleaned)
+                print("[JSON PARSE] Success after removing markdown")
+            except json.JSONDecodeError as e:
+                parse_attempts.append(f"Markdown removal failed: {str(e)}")
+                
+                # Attempt 3: Find JSON object boundaries
+                try:
+                    start_idx = response_text.find('{')
+                    end_idx = response_text.rfind('}')
+                    if start_idx != -1 and end_idx != -1:
+                        json_str = response_text[start_idx:end_idx+1]
+                        classification = json.loads(json_str)
+                        print("[JSON PARSE] Success after extracting JSON boundaries")
+                    else:
+                        raise ValueError("No JSON object found in response")
+                except (json.JSONDecodeError, ValueError) as e:
+                    parse_attempts.append(f"Boundary extraction failed: {str(e)}")
+                    print(f"[JSON PARSE ERROR] All attempts failed: {parse_attempts}")
+                    raise json.JSONDecodeError(
+                        f"Failed to parse JSON after {len(parse_attempts)} attempts",
+                        response_text,
+                        0
+                    )
         print(f"Parsed classification - Category: {classification.get('category', 'MISSING')}")
         print(f"Recommendation length: {len(classification.get('recommendation', ''))} characters")
         
