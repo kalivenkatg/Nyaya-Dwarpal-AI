@@ -223,38 +223,80 @@ JSON keys must be in English. All content values must be in romanized {language_
         
         return f"""{language_instruction}
 
-You are an expert Indian lawyer with 20+ years of experience. A client has come to you with this legal issue:
+You are an expert Indian lawyer with 20+ years of experience specializing in Bharatiya Nyaya Sanhita (BNS), Consumer Protection Act 2019, and Indian civil/criminal law. A client has come to you with this legal issue:
 
 CLIENT'S ISSUE (in {language_name}):
 "{transcribed_text}"
 
-Your job is to provide EXTREMELY DETAILED, ACTIONABLE legal advice that the client can act on IMMEDIATELY. Do NOT give generic advice like "consult a lawyer" - that's useless. Give SPECIFIC steps they can take TODAY.
+Your job is to provide EXTREMELY DETAILED, ACTIONABLE legal advice specific to Indian law that the client can act on IMMEDIATELY. Do NOT give generic advice like "consult a lawyer" - that's useless. Give SPECIFIC steps they can take TODAY.
+
+CRITICAL INSTRUCTIONS FOR INDIAN LAW:
+- ALWAYS identify specific BNS (Bharatiya Nyaya Sanhita) sections, NOT IPC
+- For consumer issues, cite Consumer Protection Act 2019 sections
+- For auto/taxi overcharging, cite Motor Vehicles Act 1988 + Consumer Protection Act 2019
+- For property, cite Transfer of Property Act 1882, Registration Act 1908
+- For employment, cite Payment of Wages Act 1936, Industrial Disputes Act 1947
+- For family law, cite Hindu Marriage Act 1955, Special Marriage Act 1954
+- DO NOT use "Other" category unless absolutely necessary
 
 ANALYZE AND CATEGORIZE:
 
-1. LEGAL CATEGORY (choose most specific - DO NOT use "Other" unless absolutely necessary):
-   - Employment Law - Unpaid Wages: salary, wages not paid, employer owes money
-   - Employment Law - Wrongful Termination: fired, terminated, dismissed without cause
-   - Employment Law - Workplace Harassment: harassment, discrimination, hostile environment
-   - Property Law - Tenant Rights: landlord issues, eviction, rent disputes, maintenance
-   - Property Law - Property Disputes: boundary disputes, illegal construction, encroachment
-   - Consumer Rights - Defective Products: faulty goods, warranty issues, refund denied
-   - Consumer Rights - Service Deficiency: poor service, overcharging, fraud by seller
-   - Family Law - Divorce: marriage dissolution, separation, alimony
-   - Family Law - Child Custody: custody disputes, visitation rights
-   - Family Law - Domestic Violence: abuse, threats, protection needed
-   - Criminal Law - Theft/Fraud: stolen property, cheating, financial fraud
-   - Criminal Law - Assault: physical violence, threats, intimidation
-   - Contract Law - Breach: agreement violated, payment not received, contract dispute
-   - Civil Disputes - Damages: compensation for injury, negligence, accident
-   - Other: ONLY if truly doesn't fit any category above
+1. LEGAL CATEGORY (choose ONE most specific - DO NOT use "Other"):
+   - Consumer Rights: defective products, service deficiency, overcharging, fraud by seller/service provider, auto/taxi fare disputes
+   - Property Dispute: boundary disputes, illegal construction, encroachment, landlord-tenant issues, rent disputes
+   - Criminal: theft, fraud, assault, cheating, criminal intimidation, domestic violence
+   - Family Law: divorce, child custody, maintenance, domestic violence, dowry harassment
+   - Labor Rights: unpaid wages, wrongful termination, workplace harassment, PF/ESI issues
+   - Cyber Crime: online fraud, identity theft, cyberbullying, data breach
+
+   EXAMPLES OF CORRECT CATEGORIZATION:
+   - "Auto driver charged ₹500 for ₹200 ride" → Consumer Rights (NOT Other)
+   - "Landlord not returning deposit" → Property Dispute (NOT Other)
+   - "Boss hasn't paid salary for 2 months" → Labor Rights (NOT Other)
+   - "Someone stole my phone" → Criminal (NOT Other)
+   - "Husband is abusive" → Family Law (NOT Other)
+   - "Fake product sold online" → Consumer Rights (NOT Other)
 
 2. URGENCY LEVEL:
-   - HIGH: Unpaid salary 2+ months, eviction notice, domestic violence, immediate threat, legal deadline within 30 days
-   - MEDIUM: Defective product, contract dispute, property maintenance, delayed payment
-   - LOW: General consultation, information request, minor disputes
+   - HIGH: Unpaid salary 2+ months, eviction notice, domestic violence, immediate threat, legal deadline within 30 days, arrest warrant
+   - MEDIUM: Defective product, contract dispute, property maintenance, delayed payment, consumer complaint
+   - LOW: General consultation, information request, minor disputes, preventive advice
 
-3. PROVIDE EXTREMELY DETAILED ADVICE:
+3. IDENTIFY SPECIFIC INDIAN LAWS (MANDATORY):
+
+   For CONSUMER RIGHTS (auto/taxi overcharging, defective products, service issues):
+   - Consumer Protection Act 2019, Section 2(9) - defines "consumer"
+   - Consumer Protection Act 2019, Section 35 - unfair trade practices
+   - Motor Vehicles Act 1988, Section 67 - fare regulation for auto/taxi
+   - File complaint at: District Consumer Forum (free for claims under ₹1 crore)
+
+   For CRIMINAL matters:
+   - Bharatiya Nyaya Sanhita (BNS) 2023 - replaced IPC
+   - BNS Section 303 - theft (replaced IPC 378)
+   - BNS Section 318 - cheating (replaced IPC 420)
+   - BNS Section 115 - voluntarily causing hurt (replaced IPC 323)
+   - BNS Section 351 - criminal intimidation (replaced IPC 506)
+   - File FIR at: Nearest police station or online via state police portal
+
+   For PROPERTY disputes:
+   - Transfer of Property Act 1882
+   - Registration Act 1908
+   - Rent Control Acts (state-specific)
+   - File suit at: Civil Court with jurisdiction
+
+   For LABOR RIGHTS:
+   - Payment of Wages Act 1936, Section 5 - timely payment
+   - Industrial Disputes Act 1947
+   - Employees' Provident Funds Act 1952
+   - File complaint at: Labour Commissioner (free)
+
+   For FAMILY LAW:
+   - Hindu Marriage Act 1955 (for Hindus)
+   - Special Marriage Act 1954 (for all religions)
+   - Protection of Women from Domestic Violence Act 2005
+   - File petition at: Family Court
+
+4. PROVIDE EXTREMELY DETAILED ADVICE:
 
 Your response MUST include:
 
@@ -311,72 +353,126 @@ I. WARNINGS/CAUTIONS:
 
 CRITICAL INSTRUCTIONS:
 - Your recommendation MUST be at least 500 words with specific, actionable steps
-- DO NOT give generic advice
+- DO NOT give generic advice like "consult a legal professional"
 - Be as detailed as a real lawyer consultation
-- Choose the MOST SPECIFIC category - avoid "Other"
+- Choose the MOST SPECIFIC category from the 6 options - NEVER use "Other"
+- ALWAYS cite specific BNS sections (NOT IPC), Consumer Protection Act sections, or other Indian laws
 - Return ONLY valid JSON - NO markdown backticks, NO preamble, NO extra text
+
+EXAMPLE FOR AUTO DRIVER OVERCHARGING:
+If client says "Auto driver charged me ₹500 for a ₹200 ride", you MUST respond:
+{{
+  "category": "Consumer Rights",
+  "subCategory": "Auto fare overcharging",
+  "legalSections": [
+    {{
+      "act": "Consumer Protection Act, 2019",
+      "section": "Section 2(9)",
+      "description": "Defines 'consumer' - any person who hires services for consideration",
+      "penalty": "Compensation + punitive damages up to ₹1 lakh",
+      "remedy": "Full refund of excess amount + compensation for harassment"
+    }},
+    {{
+      "act": "Motor Vehicles Act, 1988",
+      "section": "Section 67",
+      "description": "Regulates fares for auto-rickshaws and taxis",
+      "penalty": "Fine up to ₹500 for first offense, ₹1,500 for subsequent",
+      "remedy": "Report to RTO, file consumer complaint for refund"
+    }}
+  ],
+  "recommendation": "IMMEDIATE ACTION: You have been overcharged by an auto driver, which violates both Consumer Protection Act 2019 and Motor Vehicles Act 1988.\\n\\nSTEP 1 (TODAY): Take photo of auto meter reading, note auto registration number, save payment receipt/UPI screenshot.\\n\\nSTEP 2 (DAY 1-2): File online complaint at:\\n- National Consumer Helpline: 1800-11-4000 or consumerhelpline.gov.in\\n- State Transport Authority: [your state] RTO website\\n- Consumer Forum: edaakhil.nic.in (for claims under ₹50 lakhs)\\n\\nSTEP 3 (WEEK 1): If no response, file written complaint at District Consumer Forum (COMPLETELY FREE for claims under ₹1 crore). Required documents: Auto receipt, meter photo, complaint letter.\\n\\nLEGAL BASIS:\\nUnder Consumer Protection Act 2019, Section 2(9), you are a 'consumer' who hired auto services. Section 35 covers unfair trade practices including overcharging. Under Motor Vehicles Act 1988, Section 67, auto fares are regulated by state government - charging more is illegal.\\n\\nYOUR RIGHTS:\\n1. Full refund of excess ₹300\\n2. Compensation for mental harassment (₹2,000-5,000)\\n3. Punitive damages if fraud proven (up to ₹1 lakh)\\n\\nWHERE TO FILE:\\n1. Consumer Forum (BEST option): District Consumer Forum, [your district]. File online at edaakhil.nic.in. COMPLETELY FREE. No lawyer needed for claims under ₹10 lakhs.\\n2. RTO Complaint: [Your state] Regional Transport Office. Online portal: [state].parivahan.gov.in\\n3. Police Complaint: If driver was abusive/threatening, file FIR under BNS Section 351 (criminal intimidation)\\n\\nCOSTS:\\n- Consumer Forum filing: FREE\\n- RTO complaint: FREE\\n- Lawyer (optional): ₹2,000-5,000 for simple cases\\n- Legal aid: FREE via District Legal Services Authority for income under ₹5 lakhs/year\\n\\nTIMELINE:\\n- Consumer Forum: 3-6 months for decision\\n- RTO action: 15-30 days for penalty on driver\\n- Mediation: 1-2 months (faster option)\\n\\nCOMPENSATION YOU CAN CLAIM:\\n- Excess fare: ₹300\\n- Interest: 9% per annum from date of incident\\n- Compensation: ₹2,000-5,000 for harassment\\n- Legal costs: ₹1,000-2,000 if you hire lawyer\\n\\nFREE RESOURCES:\\n1. National Consumer Helpline: 1800-11-4000 (free advice)\\n2. District Legal Services Authority: Free lawyer for income under ₹5 lakhs/year\\n3. Consumer Forum online filing: edaakhil.nic.in (no fees)\\n4. State Transport Helpline: [your state number]\\n\\nWARNINGS:\\n- File within 2 years of incident (limitation period)\\n- Keep all evidence safe (photos, receipts, witnesses)\\n- Don't accept verbal settlement without written agreement\\n- If driver threatens you, immediately file police complaint",
+  "nextSteps": [
+    "TODAY: Take photo of auto meter, note registration number, save payment receipt",
+    "DAY 1: File online complaint at consumerhelpline.gov.in (takes 10 minutes)",
+    "DAY 2: File complaint at state RTO website against auto driver",
+    "DAY 7: If no response, visit District Consumer Forum with documents",
+    "DAY 14: File written complaint at Consumer Forum (FREE, no lawyer needed)",
+    "MONTH 1: Attend Consumer Forum hearing with evidence",
+    "MONTH 3-6: Receive Consumer Forum order with compensation"
+  ],
+  "estimatedCost": "Consumer Forum: COMPLETELY FREE (no filing fees, no lawyer needed for simple cases). Optional lawyer: ₹2,000-5,000. Legal aid: FREE via District Legal Services Authority if annual income under ₹5 lakhs",
+  "timeline": "RTO action: 15-30 days. Consumer Forum decision: 3-6 months. Mediation (faster): 1-2 months"
+}}
 
 Respond in JSON format with these EXACT keys:
 {{
-  "category": "Employment Law - Unpaid Wages",
-  "subCategory": "Salary not paid for 3 months",
-  "urgency": "high",
-  "urgencyReason": "Detailed explanation of why this is urgent with legal basis",
-  "emotionalState": "distressed",
+  "category": "Consumer Rights",
+  "subCategory": "Service deficiency - overcharging",
+  "urgency": "medium",
+  "urgencyReason": "Consumer complaint should be filed within 2 years. While not immediately urgent, prompt action ensures better evidence preservation and faster resolution",
+  "emotionalState": "frustrated",
   "facts": {{
-    "who": "employer and employee",
-    "what": "unpaid salary",
-    "when": "3 months",
-    "where": "workplace location if mentioned",
-    "amount": "monetary value if mentioned"
+    "who": "consumer and service provider (auto driver, shop owner, etc.)",
+    "what": "overcharging, defective product, poor service",
+    "when": "date of incident",
+    "where": "location of incident",
+    "amount": "monetary value involved"
   }},
   "legalSections": [
     {{
-      "act": "Payment of Wages Act, 1936",
-      "section": "Section 5",
-      "description": "Wages must be paid within 7 days for monthly employees",
-      "penalty": "Fine up to ₹3,750 + compensation to employee",
-      "remedy": "Can claim full wages + interest + compensation"
-    }}
-  ],
-  "recommendation": "EXTREMELY DETAILED multi-paragraph advice with specific steps, timelines, costs, and resources. Include:\\n\\n1. IMMEDIATE ACTIONS (Next 24-48 hours):\\n- Gather X, Y, Z documents\\n- Contact A, B, C people\\n- Preserve evidence by doing X\\n\\n2. LEGAL PROCESS (Week by week):\\n- Week 1: Send legal notice via lawyer (₹2,000-5,000)\\n- Week 2: File complaint at Labour Commissioner (FREE)\\n- Week 3-4: Attend hearing\\n- Month 2+: Labour Court if needed\\n\\n3. WHERE TO GO:\\n- Labour Commissioner Office: [address/website]\\n- Online complaint: shramsuvidha.gov.in\\n- Free legal aid: State Legal Services Authority\\n\\n4. YOUR RIGHTS:\\n- Under Section X of Act Y, you are entitled to Z\\n- Employer faces penalty of A if found guilty\\n- You can claim B + C + D\\n\\n5. COSTS:\\n- Legal notice: ₹X\\n- Filing fees: ₹Y (or FREE at Labour Commissioner)\\n- Lawyer: ₹Z (or FREE via legal aid)\\n\\n6. TIMELINE:\\n- Labour Commissioner: 1-3 months\\n- Labour Court: 6-12 months\\n- High Court appeal: 1-2 years\\n\\n7. FREE RESOURCES:\\n- [Resource 1]: [How to access]\\n- [Resource 2]: [Contact details]\\n\\n8. WARNINGS:\\n- File within X days or you lose right to claim\\n- Don't sign any settlement without lawyer review\\n- Keep all original documents safe",
-  "nextSteps": [
-    "TODAY: Collect employment contract, salary slips, bank statements showing no deposits",
-    "DAY 2: Visit State Legal Services Authority for free lawyer consultation",
-    "DAY 3: Lawyer sends legal notice to employer demanding payment within 7 days",
-    "DAY 10: If no response, file written complaint at Labour Commissioner office (FREE)",
-    "DAY 30: Attend Labour Commissioner hearing with all documents",
-    "DAY 60: If unresolved, file case in Labour Court with lawyer"
-  ],
-  "requiredDocuments": [
-    "Employment contract or appointment letter",
-    "Salary slips for last 6 months",
-    "Bank statements showing salary deposits (or lack thereof)",
-    "Email/WhatsApp correspondence with employer about salary",
-    "Any written warnings or termination letters",
-    "Identity proof (Aadhaar, PAN card)"
-  ],
-  "estimatedCost": "Legal notice: ₹2,000-5,000, Labour Commissioner: FREE, Labour Court filing: ₹500-1,000, Lawyer fees: ₹10,000-25,000 (or FREE via legal aid for cases under ₹5 lakhs)",
-  "timeline": "1-3 months via Labour Commissioner (fastest route), 6-12 months if case goes to Labour Court, 1-2 years if appeals to High Court",
-  "severity": "high",
-  "resources": [
-    {{
-      "name": "Labour Commissioner Office",
-      "action": "File free complaint at nearest office. Find location: https://labour.gov.in/",
-      "cost": "Completely FREE - no fees for filing or hearings",
-      "timeline": "Complaint resolved in 1-3 months typically"
+      "act": "Consumer Protection Act, 2019",
+      "section": "Section 2(9)",
+      "description": "Defines 'consumer' as any person who hires services or buys goods for consideration",
+      "penalty": "Compensation + punitive damages as determined by Consumer Forum",
+      "remedy": "Full refund + compensation for deficiency in service + mental harassment"
     }},
     {{
-      "name": "State Legal Services Authority",
-      "action": "Get free lawyer for cases under ₹5 lakhs. Visit district legal aid office or call 15100",
-      "cost": "Completely FREE legal representation",
+      "act": "Consumer Protection Act, 2019",
+      "section": "Section 35",
+      "description": "Covers unfair trade practices including overcharging, false representation, defective goods",
+      "penalty": "Imprisonment up to 2 years + fine up to ₹10 lakhs for repeat offenders",
+      "remedy": "Replacement of goods, refund of price, compensation for loss"
+    }}
+  ],
+  "recommendation": "EXTREMELY DETAILED multi-paragraph advice with specific steps, timelines, costs, and resources. Include:\\n\\n1. IMMEDIATE ACTIONS (Next 24-48 hours):\\n- Gather receipts, bills, payment proof (UPI screenshots, bank statements)\\n- Take photos/videos of defective product or service issue\\n- Note down names, dates, locations, registration numbers\\n- Collect witness contact information if available\\n\\n2. LEGAL PROCESS (Week by week):\\n- DAY 1-3: File online complaint at National Consumer Helpline (1800-11-4000) or consumerhelpline.gov.in\\n- WEEK 1: Send legal notice to service provider via registered post (₹500-2,000 via lawyer or self-drafted)\\n- WEEK 2: If no response, file complaint at District Consumer Forum via edaakhil.nic.in (COMPLETELY FREE)\\n- WEEK 3-4: Attend first hearing at Consumer Forum with all documents\\n- MONTH 2-6: Consumer Forum passes order with compensation\\n\\n3. WHERE TO GO:\\n- District Consumer Forum: [Your district name] Consumer Forum. File online at edaakhil.nic.in or visit in person\\n- National Consumer Helpline: Call 1800-11-4000 for free guidance\\n- State Consumer Commission: For claims ₹1 crore to ₹10 crores\\n- National Consumer Commission: For claims above ₹10 crores\\n- Legal Aid: District Legal Services Authority for free lawyer (if income under ₹5 lakhs/year)\\n\\n4. YOUR RIGHTS UNDER CONSUMER PROTECTION ACT 2019:\\n- Section 2(9): You are a 'consumer' entitled to protection\\n- Section 35: Unfair trade practices are punishable\\n- Section 84: Consumer Forum can order refund + compensation + punitive damages\\n- Right to be heard, right to seek redressal, right to consumer education\\n\\n5. COSTS:\\n- Consumer Forum filing: COMPLETELY FREE (no court fees for any claim amount)\\n- Legal notice: ₹500-2,000 (optional, can self-draft)\\n- Lawyer fees: ₹2,000-10,000 (optional for simple cases, mandatory for complex cases)\\n- FREE legal aid: Available via District Legal Services Authority if annual income under ₹5 lakhs\\n- Mediation: FREE option available at Consumer Forum (faster resolution)\\n\\n6. TIMELINE:\\n- Online complaint response: 7-15 days\\n- Legal notice response: 15-30 days\\n- Consumer Forum decision: 3-6 months (simple cases), 6-12 months (complex cases)\\n- Mediation settlement: 1-2 months (fastest option)\\n- Appeal to State Commission: 6-12 months\\n- Appeal to National Commission: 1-2 years\\n\\n7. COMPENSATION YOU CAN CLAIM:\\n- Full refund of amount paid\\n- Replacement of defective goods\\n- Interest at 9-12% per annum from date of payment\\n- Compensation for mental harassment: ₹5,000-50,000 depending on severity\\n- Litigation costs: ₹2,000-10,000\\n- Punitive damages: Up to ₹1 lakh for deliberate fraud\\n\\n8. FREE RESOURCES:\\n- National Consumer Helpline: 1800-11-4000 (free advice, complaint filing)\\n- Consumer Forum online portal: edaakhil.nic.in (file complaint in 15 minutes)\\n- District Legal Services Authority: Free lawyer for income under ₹5 lakhs/year. Visit district court or call 15100\\n- State Consumer Helpline: [Your state] consumer helpline number\\n- Consumer awareness websites: consumerhelpline.gov.in, confonet.nic.in\\n\\n9. WARNINGS/CAUTIONS:\\n- File complaint within 2 years of cause of action (limitation period under Consumer Protection Act)\\n- Keep all original documents safe - submit only photocopies to Consumer Forum\\n- Don't accept verbal settlement - get written agreement on company letterhead\\n- If service provider offers replacement, ensure written guarantee\\n- For claims above ₹10 lakhs, consider hiring experienced consumer lawyer\\n- Attend all hearings - absence may lead to dismissal of complaint\\n- If you win, service provider may appeal - be prepared for longer process\\n\\n10. SPECIFIC TO YOUR CASE:\\n[Analyze the specific facts and provide tailored advice based on whether it's auto overcharging, defective product, poor service, etc.]",
+  "nextSteps": [
+    "TODAY: Collect all receipts, bills, payment proof, photos of defective product/service",
+    "DAY 1: File online complaint at consumerhelpline.gov.in (takes 10 minutes, completely free)",
+    "DAY 2: Send legal notice to service provider via registered post demanding refund/replacement within 15 days",
+    "DAY 7: If no response, visit District Legal Services Authority for free lawyer consultation",
+    "DAY 14: File written complaint at District Consumer Forum via edaakhil.nic.in (completely free, no lawyer needed)",
+    "DAY 30: Attend first hearing at Consumer Forum with all original documents and 3 photocopies",
+    "MONTH 2: Attend mediation session if offered by Consumer Forum (faster resolution)",
+    "MONTH 3-6: Receive Consumer Forum order with compensation and refund"
+  ],
+  "requiredDocuments": [
+    "Original bill/receipt/invoice of purchase or service",
+    "Payment proof: UPI screenshot, bank statement, credit card statement, cash receipt",
+    "Photos/videos of defective product or poor service",
+    "Warranty card or guarantee certificate (if applicable)",
+    "Correspondence with service provider: emails, WhatsApp chats, letters",
+    "Witness statements (if any)",
+    "Medical bills (if product/service caused injury)",
+    "Identity proof: Aadhaar card, PAN card, Voter ID",
+    "Address proof: Aadhaar, utility bill, rent agreement"
+  ],
+  "estimatedCost": "Consumer Forum filing: COMPLETELY FREE (no court fees). Legal notice: ₹500-2,000 (optional). Lawyer fees: ₹2,000-10,000 (optional for simple cases). Legal aid: FREE via District Legal Services Authority for income under ₹5 lakhs/year. Total out-of-pocket: ₹0-5,000 for most cases",
+  "timeline": "Online complaint response: 7-15 days. Consumer Forum decision: 3-6 months (simple cases), 6-12 months (complex). Mediation: 1-2 months (fastest). Appeal to State Commission: 6-12 months. Appeal to National Commission: 1-2 years",
+  "severity": "medium",
+  "resources": [
+    {{
+      "name": "District Consumer Forum",
+      "action": "File complaint online at edaakhil.nic.in or visit in person at [your district] Consumer Forum",
+      "cost": "Completely FREE - no filing fees, no court fees, no lawyer needed for simple cases",
+      "timeline": "Decision in 3-6 months for simple cases"
+    }},
+    {{
+      "name": "National Consumer Helpline",
+      "action": "Call 1800-11-4000 or visit consumerhelpline.gov.in for free advice and complaint filing",
+      "cost": "Completely FREE helpline and online complaint system",
+      "timeline": "Response within 7-15 days"
+    }},
+    {{
+      "name": "District Legal Services Authority",
+      "action": "Get free lawyer for income under ₹5 lakhs/year. Visit district court legal aid office or call 15100",
+      "cost": "Completely FREE legal representation for eligible persons",
       "timeline": "Lawyer assigned within 7-15 days"
     }},
     {{
-      "name": "Shram Suvidha Portal",
-      "action": "File online complaint: https://shramsuvidha.gov.in/",
-      "cost": "FREE online complaint system",
-      "timeline": "Response within 30 days"
+      "name": "State Consumer Commission",
+      "action": "For claims ₹1 crore to ₹10 crores. File at state capital Consumer Commission",
+      "cost": "FREE filing, but lawyer recommended for high-value claims",
+      "timeline": "Decision in 6-12 months"
     }}
   ],
   "legalDisclaimer": "This advice is AI-generated for informational purposes only. Please consult a qualified legal professional before taking any action. Laws may vary by state."
