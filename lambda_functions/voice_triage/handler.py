@@ -284,7 +284,7 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
         Dict with classification results including recommendations and next steps
     """
     print(f"=== CLASSIFY LEGAL PROBLEM ===")
-    print(f"Calling Groq with transcription: {transcription[:100]}...")
+    print(f"Calling Bedrock with transcription: {transcription[:100]}...")
     print(f"Language: {language}, Use Native Script: {use_native_script}")
     
     prompt = bedrock_client.build_legal_triage_prompt(transcription, language, use_native_script)
@@ -293,7 +293,7 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
     print(f"Prompt preview: {prompt[:500]}...")
     
     try:
-        print("Invoking Groq model...")
+        print("Invoking Bedrock model...")
         result = bedrock_client.invoke_model(
             prompt=prompt,
             max_tokens=3000,  # Increased for longer responses
@@ -301,7 +301,7 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
             system_prompt="You are an expert Indian lawyer with 20+ years of experience. You MUST provide detailed, actionable legal advice. NEVER say 'consult a lawyer' as generic advice. Always give specific steps, costs, timelines, and resources. Choose the most specific legal category - DO NOT return 'Other' unless absolutely necessary."
         )
         
-        print(f"Groq response received. Length: {len(result['text'])} characters")
+        print(f"Bedrock response received. Length: {len(result['text'])} characters")
         print(f"Token usage: {result.get('usage', {})}")
         
         # Parse JSON response with improved error handling
@@ -317,7 +317,7 @@ def classify_legal_problem(transcription: str, language: str, use_native_script:
                     break
         # Remove control characters
         response_text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', ' ', response_text).strip()
-        print(f"[GROQ RAW RESPONSE] First 500 chars: {response_text[:500]}...")
+        print(f"[BEDROCK RAW RESPONSE] First 500 chars: {response_text[:500]}...")
         
         # Try to parse JSON with multiple fallback strategies
         classification = None

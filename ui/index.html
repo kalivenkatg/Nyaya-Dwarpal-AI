@@ -154,7 +154,7 @@
         
         <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-nyaya-blue-light">
             <div class="text-xs text-gray-400">
-                <p>AI-powered legal assistant for Indian citizens — Voice triage, document verification, and multilingual legal advice in 10+ Indian languages. Built for AI for Bharat Hackathon using AWS Lambda, Sarvam AI, and Groq AI.</p>
+                <p>AI-powered legal assistant for Indian citizens — Voice triage, document verification, and multilingual legal advice in 10+ Indian languages. Built for AI for Bharat Hackathon using AWS Lambda, Sarvam AI, and AWS Bedrock.</p>
             </div>
         </div>
     </aside>
@@ -1151,7 +1151,7 @@
                 console.log('Required Documents:', data.data?.requiredDocuments);
                 
                 if (data.success) {
-                    displayResults(data.data);
+                    setTimeout(() => displayResults(data.data), 100);
                 } else {
                     throw new Error(data.error || 'API request failed');
                 }

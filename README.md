@@ -130,7 +130,7 @@
 │         │ │                                                          │
 │         ▼ ▼                                                          │
 │  ┌──────────────────────────────────────────────────────────┐       │
-│  │           Groq AI (Llama 3.3 70B Versatile)             │       │
+│  │      AWS Bedrock (Claude 3.5 Sonnet)                    │       │
 │  │  • Emotion Detection  • Legal Classification             │       │
 │  │  • Fact Extraction    • Petition Generation              │       │
 │  └──────────────────────────────────────────────────────────┘       │
@@ -181,11 +181,11 @@
 - **Amazon API Gateway**: REST API management
 - **Amazon S3**: Document storage with encryption
 - **Amazon DynamoDB**: NoSQL database for sessions and metadata
-- **Groq AI**: Llama 3.3 70B Versatile for legal reasoning
+- **AWS Bedrock**: Claude 3.5 Sonnet for legal reasoning
 - **AWS Textract**: Document text extraction (cross-region)
 
 ### **AI/ML Services**
-- **Groq (Llama 3.3 70B Versatile)**: 
+- **AWS Bedrock (Claude 3.5 Sonnet)**: 
   - Emotion detection and urgency analysis
   - Legal problem classification
   - Fact extraction
@@ -210,16 +210,20 @@
 
 ## 🤔 Why These Services?
 
-### **Groq AI over AWS Bedrock**
-**Speed & Performance**
-- **Ultra-Fast Inference**: Groq's LPU (Language Processing Unit) delivers 10x faster inference than traditional GPUs
-- **Low Latency**: Sub-second response times for legal analysis, crucial for real-time voice triage
-- **Cost-Effective**: Competitive pricing with high throughput
-- **Llama 3.3 70B**: State-of-the-art open-source model with excellent reasoning capabilities
-- **No Vendor Lock-in**: Open-source model can be deployed elsewhere if needed
-- **API Simplicity**: Clean REST API with straightforward integration
+### **AWS Bedrock (Claude 3.5 Sonnet)**
+**Advanced Legal Reasoning**
+- **State-of-the-Art Performance**: Claude 3.5 Sonnet excels at complex reasoning and analysis
+- **Long Context Window**: Handles detailed legal documents and multi-turn conversations
+- **Multilingual Support**: Strong performance across English and Indic languages
+- **JSON Mode**: Reliable structured output for legal classifications
 
-**Why This Matters**: When a user speaks their legal problem, they expect instant analysis. Groq's LPU architecture provides near-instantaneous responses, making the experience feel truly conversational rather than waiting for AI processing.
+**AWS Integration**
+- **Seamless Integration**: Native AWS service with no external API dependencies
+- **Security & Compliance**: Enterprise-grade security with AWS IAM controls
+- **Scalability**: Auto-scales with Lambda for any load
+- **Cost-Effective**: Pay-per-use pricing with no minimum commitments
+
+**Why This Matters**: When a user speaks their legal problem, they need accurate, detailed analysis. Claude 3.5 Sonnet provides sophisticated legal reasoning while maintaining fast response times through AWS's infrastructure.
 
 ---
 
@@ -293,14 +297,14 @@
 
 **Total Monthly Cost Breakdown** (for 10,000 users):
 ```
-Groq AI (Llama 3.3 70B):     ₹1,500  (1M tokens)
+AWS Bedrock (Claude 3.5):    ₹2,000  (1M tokens)
 Lambda Execution:            ₹300    (100K invocations)
 DynamoDB:                    ₹500    (10M reads/writes)
 S3 Storage:                  ₹200    (100GB documents)
 API Gateway:                 ₹100    (100K requests)
 Sarvam AI:                   ₹1,500  (10K transcriptions)
 ─────────────────────────────────────────────────
-TOTAL:                       ₹4,100/month
+TOTAL:                       ₹4,600/month
 ```
 
 **Traditional Stack Cost** (EC2 + RDS + Load Balancer):
@@ -467,7 +471,7 @@ curl -X GET "https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/cases?
 - **Cost Reduction**: Free legal triage vs ₹500-₹2000 per consultation
 - **Time Savings**: Instant analysis vs days of waiting for lawyer appointments
 - **Reach**: Cloud-based solution accessible from any smartphone
-- **Accuracy**: 85%+ confidence in legal classification using Groq AI (Llama 3.3 70B)
+- **Accuracy**: 85%+ confidence in legal classification using AWS Bedrock (Claude 3.5 Sonnet)
 
 ---
 
@@ -506,8 +510,7 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 ## 🙏 Acknowledgments
 
-- **AWS**: For Lambda, S3, DynamoDB, and cloud infrastructure
-- **Groq**: For ultra-fast LPU inference with Llama 3.3 70B
+- **AWS**: For Lambda, S3, DynamoDB, Bedrock, and cloud infrastructure
 - **Sarvam AI**: For Indic language models (Saaras v3, Mayura v1)
 - **AI for Bharat**: For organizing this impactful hackathon
 - **Indian Legal System**: For inspiring us to make justice accessible
@@ -528,7 +531,7 @@ For questions, feedback, or collaboration:
 ---
 
 ![Made with AWS](https://img.shields.io/badge/Made%20with-AWS%20Lambda-orange)
-![Groq AI](https://img.shields.io/badge/Powered%20by-Groq%20AI-purple)
+![AWS Bedrock](https://img.shields.io/badge/Powered%20by-AWS%20Bedrock-purple)
 ![Sarvam AI](https://img.shields.io/badge/Powered%20by-Sarvam%20AI-blue)
 ![Python](https://img.shields.io/badge/Python-3.11-green)
 
