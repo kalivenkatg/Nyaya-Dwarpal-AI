@@ -799,18 +799,18 @@
             triageContent.innerHTML = '';
             
             // Category
-            if (data.classification && data.classification.category) {
+            if (data.category) {
                 const categoryDiv = document.createElement('div');
                 categoryDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
                 categoryDiv.innerHTML = `
                     <p class="text-sm font-medium text-gray-600 mb-1">Legal Category</p>
-                    <p class="text-lg font-bold text-nyaya-blue">${data.classification.category}</p>
+                    <p class="text-lg font-bold text-nyaya-blue">${data.category}</p>
                 `;
                 triageContent.appendChild(categoryDiv);
             }
             
             // Urgency
-            if (data.emotion && data.emotion.urgency) {
+            if (data.urgency) {
                 const urgencyDiv = document.createElement('div');
                 urgencyDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
                 const urgencyColors = {
@@ -818,27 +818,27 @@
                     medium: 'text-yellow-600 bg-yellow-50',
                     low: 'text-green-600 bg-green-50'
                 };
-                const urgencyClass = urgencyColors[data.emotion.urgency.toLowerCase()] || 'text-gray-600 bg-gray-50';
+                const urgencyClass = urgencyColors[data.urgency.toLowerCase()] || 'text-gray-600 bg-gray-50';
                 urgencyDiv.innerHTML = `
                     <p class="text-sm font-medium text-gray-600 mb-1">Urgency Level</p>
-                    <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${urgencyClass}">${data.emotion.urgency.toUpperCase()}</span>
+                    <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${urgencyClass}">${data.urgency.toUpperCase()}</span>
                 `;
                 triageContent.appendChild(urgencyDiv);
             }
             
             // Emotional State
-            if (data.emotion && data.emotion.primary) {
+            if (data.emotionalState) {
                 const emotionDiv = document.createElement('div');
                 emotionDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
                 emotionDiv.innerHTML = `
                     <p class="text-sm font-medium text-gray-600 mb-1">Emotional State</p>
-                    <p class="text-lg font-semibold text-gray-900">${data.emotion.primary.charAt(0).toUpperCase() + data.emotion.primary.slice(1)}</p>
+                    <p class="text-lg font-semibold text-gray-900">${data.emotionalState.charAt(0).toUpperCase() + data.emotionalState.slice(1)}</p>
                 `;
                 triageContent.appendChild(emotionDiv);
             }
             
             // Relevant Sections
-            if (data.classification && data.classification.relevantSections && data.classification.relevantSections.length > 0) {
+            if (data.relevantSections && data.relevantSections.length > 0) {
                 const sectionsDiv = document.createElement('div');
                 sectionsDiv.className = 'bg-white rounded-lg p-4 border border-gray-200';
                 sectionsDiv.innerHTML = '<p class="text-sm font-medium text-gray-600 mb-3">Relevant Legal Sections</p>';
@@ -846,7 +846,7 @@
                 const sectionsList = document.createElement('div');
                 sectionsList.className = 'space-y-3';
                 
-                data.classification.relevantSections.forEach(section => {
+                data.relevantSections.forEach(section => {
                     const sectionCard = document.createElement('div');
                     sectionCard.className = 'bg-gradient-to-r from-nyaya-blue/5 to-justice-gold/5 rounded-lg p-3 border border-gray-100';
                     sectionCard.innerHTML = `
@@ -1000,35 +1000,36 @@
                 angry: 'bg-red-500',
                 distressed: 'bg-orange-500',
                 confused: 'bg-purple-500',
-                calm: 'bg-green-500'
+                calm: 'bg-green-500',
+                frustrated: 'bg-orange-500'
             };
-            if (data.emotion && data.emotion.primary) {
-                document.getElementById('bns-emotion-dot').className = `w-3 h-3 rounded-full ${emotionColors[data.emotion.primary] || 'bg-gray-500'}`;
-                document.getElementById('bns-emotion-text').textContent = data.emotion.primary.charAt(0).toUpperCase() + data.emotion.primary.slice(1);
+            if (data.emotionalState) {
+                document.getElementById('bns-emotion-dot').className = `w-3 h-3 rounded-full ${emotionColors[data.emotionalState] || 'bg-gray-500'}`;
+                document.getElementById('bns-emotion-text').textContent = data.emotionalState.charAt(0).toUpperCase() + data.emotionalState.slice(1);
             }
 
             // Update urgency in BNS panel
-            if (data.emotion && data.emotion.urgency) {
+            if (data.urgency) {
                 const urgencyColors = {
                     high: 'bg-red-100 text-red-800',
                     medium: 'bg-yellow-100 text-yellow-800',
                     low: 'bg-green-100 text-green-800'
                 };
-                document.getElementById('bns-urgency-badge').className = `px-3 py-1 rounded-full text-xs font-bold ${urgencyColors[data.emotion.urgency] || 'bg-gray-100 text-gray-800'}`;
-                document.getElementById('bns-urgency-badge').textContent = data.emotion.urgency.toUpperCase();
+                document.getElementById('bns-urgency-badge').className = `px-3 py-1 rounded-full text-xs font-bold ${urgencyColors[data.urgency] || 'bg-gray-100 text-gray-800'}`;
+                document.getElementById('bns-urgency-badge').textContent = data.urgency.toUpperCase();
             }
 
             // Update category in BNS panel
-            if (data.classification && data.classification.category) {
-                document.getElementById('bns-category').textContent = data.classification.category;
+            if (data.category) {
+                document.getElementById('bns-category').textContent = data.category;
             }
 
             // Update sections in BNS panel
             const sectionsList = document.getElementById('bns-sections-list');
             sectionsList.innerHTML = '';
             
-            if (data.classification && data.classification.relevantSections && data.classification.relevantSections.length > 0) {
-                data.classification.relevantSections.forEach(section => {
+            if (data.relevantSections && data.relevantSections.length > 0) {
+                data.relevantSections.forEach(section => {
                     const sectionCard = document.createElement('div');
                     sectionCard.className = 'bg-gradient-to-r from-nyaya-blue/5 to-justice-gold/5 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow';
                     sectionCard.innerHTML = `
