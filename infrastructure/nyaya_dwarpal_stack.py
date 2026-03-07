@@ -321,7 +321,7 @@ class NyayaDwarpalStack(Stack):
                 "ARCHIVE_BUCKET": self.archive_bucket.bucket_name,
                 "GLOSSARY_TABLE": self.glossary_table.table_name,
                 "SARVAM_AI_ENDPOINT": "https://api.sarvam.ai",
-                "SARVAM_AI_API_KEY": "REDACTED_API_KEY",
+                "SARVAM_AI_API_KEY": os.environ.get("SARVAM_API_KEY", ""),
             },
             tracing=lambda_.Tracing.ACTIVE,
         )
@@ -388,7 +388,7 @@ class NyayaDwarpalStack(Stack):
             timeout=Duration.seconds(60),
             memory_size=512,
             environment={
-                "SARVAM_API_KEY": "sk_a07scrq0_Bx8WyEWNUGBLYx6OWXs4hrF7",
+                "SARVAM_API_KEY": os.environ.get("SARVAM_API_KEY", ""),
             },
             tracing=lambda_.Tracing.ACTIVE,
         )
