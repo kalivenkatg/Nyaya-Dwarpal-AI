@@ -1122,21 +1122,17 @@
                 // Show progress bar
                 document.getElementById('upload-progress').classList.remove('hidden');
                 document.getElementById('upload-filename').textContent = file.name;
-                document.getElementById('upload-percentage').textContent = 'Uploading to S3...';
+                document.getElementById('upload-percentage').textContent = 'Reading file...';
                 
-                // Step 1: Upload file to S3
-                const s3Key = await uploadFileToS3(file);
-                
-                if (!s3Key) {
-                    throw new Error('S3 upload failed');
-                }
+                // Read file as base64
+                const fileContent = await readFileAsBase64(file);
                 
                 // Update progress
                 document.getElementById('upload-percentage').textContent = 'Translating...';
                 document.getElementById('upload-bar').style.width = '50%';
                 
-                // Step 2: Call translation API with S3 key
-                const translationResult = await translateDocument(s3Key, file.name);
+                // Call translation API with file content
+                const translationResult = await translateDocument(fileContent, file.name);
                 
                 // Update progress to complete
                 document.getElementById('upload-bar').style.width = '100%';
@@ -1150,66 +1146,27 @@
                 }, 1000);
                 
             } catch (error) {
-                console.error('Upload/Translation Error:', error);
+                console.error('Translation Error:', error);
                 document.getElementById('upload-progress').classList.add('hidden');
                 document.getElementById('upload-bar').style.width = '0%';
                 alert('Error: ' + error.message);
             }
         }
 
-        async function uploadFileToS3(file) {
-            // S3 bucket configuration
-            const BUCKET_NAME = 'nyayadwarpalstack-nyayadocbucketv24eb39526-yskr4fmijdf4';
-            const REGION = 'ap-south-2';
-            
-            // Generate unique filename
-            const timestamp = Date.now();
-            const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-            const s3Key = `documents/${timestamp}_${sanitizedFilename}`;
-            
-            try {
-                // For browser-based S3 upload, we need AWS SDK
-                // Since we can't use AWS SDK directly in browser without credentials,
-                // we'll use a simple PUT request approach
-                
-                // Read file as ArrayBuffer
-                const fileContent = await file.arrayBuffer();
-                
-                // Create FormData for multipart upload (alternative approach)
-                // Note: In production, you should get a pre-signed URL from your backend
-                // For now, we'll simulate the upload and use the S3 key
-                
-                console.log(`Uploading ${file.name} to S3 key: ${s3Key}`);
-                
-                // Simulate upload progress
-                let progress = 0;
-                const uploadInterval = setInterval(() => {
-                    progress += 20;
-                    if (progress <= 100) {
-                        document.getElementById('upload-bar').style.width = (progress / 2) + '%';
-                    } else {
-                        clearInterval(uploadInterval);
-                    }
-                }, 200);
-                
-                // In a real implementation, you would:
-                // 1. Call your backend to get a pre-signed S3 URL
-                // 2. Upload the file to that URL
-                // For demo, we'll use the AWS CLI approach or assume file is already uploaded
-                
-                // Wait for simulated upload
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                clearInterval(uploadInterval);
-                
-                return s3Key;
-                
-            } catch (error) {
-                console.error('S3 Upload Error:', error);
-                throw new Error('Failed to upload file to S3');
-            }
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // Remove data URL prefix (e.g., "data:text/plain;base64,")
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
-        async function translateDocument(s3Key, filename) {
+        async function translateDocument(fileContent, filename) {
             try {
                 const response = await fetch(`${API_ENDPOINT}/translate/document`, {
                     method: 'POST',
@@ -1218,7 +1175,8 @@
                     },
                     body: JSON.stringify({
                         userId: 'user-001',
-                        s3Key: s3Key,
+                        fileContent: fileContent,
+                        filename: filename,
                         sourceLanguage: 'en',
                         targetLanguage: 'hi',
                         documentType: 'Legal Notice'

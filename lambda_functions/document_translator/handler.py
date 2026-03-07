@@ -32,17 +32,62 @@ s3_helper = S3Helper()
 dynamodb_helper = DynamoDBHelper()
 
 
-def extract_text_from_document(s3_key: str, bucket: str) -> str:
+def extract_text_from_document(s3_key: str = None, bucket: str = None, file_content: str = None, filename: str = None) -> str:
     """
     Smart text extraction based on file type
     
     Args:
-        s3_key: S3 object key
-        bucket: S3 bucket name
+        s3_key: S3 object key (optional if file_content provided)
+        bucket: S3 bucket name (optional if file_content provided)
+        file_content: Base64 encoded file content (optional if s3_key provided)
+        filename: Original filename (required if file_content provided)
         
     Returns:
         Extracted text content
     """
+    # If file content is provided directly (base64), decode and process
+    if file_content:
+        import base64
+        print(f"Processing file content directly: {filename}")
+        
+        # Decode base64 content
+        file_bytes = base64.b64decode(file_content)
+        
+        # Determine file type from filename
+        ext = os.path.splitext(filename)[1].lower() if filename else '.txt'
+        
+        if ext == '.txt':
+            # Decode text directly
+            return file_bytes.decode('utf-8')
+        else:
+            # For PDFs, we need to upload to S3 temporarily for Textract
+            # (Textract requires S3 location)
+            temp_key = f"temp/{uuid.uuid4()}{ext}"
+            s3_helper.upload_file(
+                file_content=file_bytes,
+                bucket=bucket or DOCUMENT_BUCKET,
+                key=temp_key,
+                content_type='application/pdf' if ext == '.pdf' else 'image/jpeg'
+            )
+            
+            # Use Textract
+            textract_helper = TextractHelper(region='ap-south-1')
+            textract_response = textract_helper.analyze_document(
+                bucket=bucket or DOCUMENT_BUCKET,
+                key=temp_key,
+                feature_types=['FORMS', 'TABLES']
+            )
+            
+            # Clean up temp file
+            try:
+                s3_client = boto3.client('s3', region_name='ap-south-2')
+                s3_client.delete_object(Bucket=bucket or DOCUMENT_BUCKET, Key=temp_key)
+            except:
+                pass
+            
+            return textract_helper.extract_text(textract_response)
+    
+    # Otherwise, read from S3
     ext = os.path.splitext(s3_key)[1].lower()
     
     if ext == '.txt':
@@ -84,9 +129,11 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         target_language = body.get('targetLanguage', 'en')
         document_type = body.get('documentType', 'Other')
         s3_key = body.get('s3Key')
+        file_content = body.get('fileContent')  # Base64 encoded file
+        filename = body.get('filename')
         
-        # Validate required fields
-        if not user_id or not s3_key:
+        # Validate required fields (either s3Key OR fileContent+filename)
+        if not user_id:
             return {
                 'statusCode': 400,
                 'headers': {
@@ -97,13 +144,38 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 },
                 'body': json.dumps(APIResponse.error_response(
                     message="Missing required fields",
-                    error="userId and s3Key are required"
+                    error="userId is required"
                 ).dict())
             }
         
-        # Step 1: Extract text using smart extraction (direct S3 for .txt, Textract for PDFs/images)
-        print(f"Extracting text from document: {s3_key}")
-        original_text = extract_text_from_document(s3_key, DOCUMENT_BUCKET)
+        if not s3_key and not (file_content and filename):
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key',
+                    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+                },
+                'body': json.dumps(APIResponse.error_response(
+                    message="Missing required fields",
+                    error="Either s3Key or (fileContent + filename) is required"
+                ).dict())
+            }
+        
+        # Step 1: Extract text using smart extraction
+        print(f"Extracting text from document")
+        if file_content:
+            original_text = extract_text_from_document(
+                file_content=file_content,
+                filename=filename,
+                bucket=DOCUMENT_BUCKET
+            )
+        else:
+            original_text = extract_text_from_document(
+                s3_key=s3_key,
+                bucket=DOCUMENT_BUCKET
+            )
         
         if not original_text:
             return {
@@ -383,7 +455,7 @@ def translate_text(
             }
             
             response = requests.post(
-                'https://api.sarvam.ai/translate',
+                f'{SARVAM_AI_ENDPOINT}/translate',
                 headers=headers,
                 json=payload,
                 timeout=30
