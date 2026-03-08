@@ -8,6 +8,12 @@
 
 ---
 
+## 🌐 Live Demo
+
+**[https://main.d1y87jb5yrv6jl.amplifyapp.com/](https://main.d1y87jb5yrv6jl.amplifyapp.com/)**
+
+---
+
 ## 🎯 Problem Statement
 
 **Access to justice in India faces critical barriers:**
@@ -38,63 +44,91 @@
 
 ---
 
-### 2. 📄 Document Translation (Bhasha Parivartan)
-**Translate legal documents between English and regional languages**
+### 2. 📄 Document Verification
+**Verify legal documents for issues and risks**
 
 - **Smart Upload**: Drag-and-drop interface for .txt and .pdf files
-- **S3 Integration**: Secure document storage with encryption
-- **Intelligent Extraction**: 
-  - Direct text reading for .txt files
-  - AWS Textract for PDFs and images (cross-region support)
-- **Legal Translation**: Sarvam AI Mayura v1 model with formal legal tone
-- **Chunked Processing**: Handles large documents by splitting into 900-character chunks
-- **Download Support**: Pre-signed S3 URLs for translated documents
+- **AI-Powered Analysis**: Detects issues and flags them with HIGH/MEDIUM/LOW severity
+- **Legal Risk Detection**: Identifies unfair clauses, missing sections, and legal red flags
+- **Instant Results**: Get a detailed breakdown of document issues in seconds
 
-**Use Case**: A small business owner receives an English legal notice and needs it translated to Tamil to understand the implications.
+**Use Case**: A job seeker can upload an employment agreement and instantly see which clauses are unfair, risky, or legally problematic before signing.
 
 ---
 
-### 3. 📝 Petition Architect (Darkhwast Nirman)
-**AI-generated legal petitions in proper format**
-
-- **Fact Extraction**: Automatically extracts key facts from user's description
-- **Legal Grounding**: Identifies applicable BNS/BNSS/CPC sections
-- **Structured Drafting**: Generates petitions with:
-  - Facts Section: Chronological narrative
-  - Grounds Section: Legal provisions and arguments
-  - Prayer Section: Relief sought
-  - Verification Statement: Proper legal format
-- **Citation Verification**: Validates legal citations and suggests updated equivalents
-- **Defect Detection**: Identifies missing information or formatting issues
-
-**Use Case**: A tenant facing illegal eviction can generate a properly formatted petition citing relevant sections without hiring a lawyer.
-
----
-
-### 4. 🗂️ Case Memory (Mamla Yaad)
+### 3. 🗂️ Case Memory (Mamla Yaad)
 **Your personal legal consultation history**
 
 - **Automatic Saving**: All voice triage sessions stored in DynamoDB
 - **Smart Retrieval**: Fetch cases by user ID with filtering
-- **Rich Metadata**: 
+- **Rich Metadata**:
   - Case ID and timestamp
   - Emotion badges (color-coded: red/orange/purple/green)
   - Legal category and relevant sections
   - Full transcription and extracted facts
 - **Case Details Modal**: View complete case information
-- **Generate Petition**: One-click petition generation from saved cases
 
-**Use Case**: A user can review their previous consultations about a property dispute and generate a petition when ready to file.
+**Use Case**: A user can review their previous consultations about a property dispute and track their legal history over time.
 
 ---
 
-### 5. 📚 Legal Library (Kanoon Gyan) *(Coming Soon)*
+### 4. 📚 Legal Library (Kanoon Gyan) *(Coming Soon)*
 **Searchable database of BNS, BNSS, and CPC sections**
 
 - Browse legal sections by category
 - Plain-language explanations
 - Real-world examples
 - Cross-references between sections
+
+---
+
+## 🖥️ How to Use
+
+### Step 1 — Open the App
+Visit **[https://main.d1y87jb5yrv6jl.amplifyapp.com/](https://main.d1y87jb5yrv6jl.amplifyapp.com/)** on any browser (desktop or mobile).
+
+---
+
+### Step 2 — Voice Triage (Describe Your Legal Problem)
+
+1. Click **"Voice Triage"** from the dashboard or sidebar
+2. Select your **language** from the top-right dropdown (e.g. 🌐 English or हिंदी)
+3. Click the **microphone button** to start recording
+4. Speak your legal issue clearly — for example:
+   - *"Auto driver ne mujhse 500 rupaye liye, sirf 200 rupaye ka safar tha"* (Hindi)
+   - *"My landlord is not returning my security deposit"* (English)
+5. Click the mic again to **stop recording**
+6. The AI will automatically:
+   - Transcribe your speech
+   - Detect your emotional state and urgency level
+   - Classify your legal issue (e.g. Consumer Rights, Tenant Rights, Labour Law)
+   - Show relevant legal sections with plain-language advice
+   - Suggest specific next steps with timelines and costs
+
+> 💡 **Tip**: You can also type your issue directly using the **"Type Your Issue"** tab if you prefer not to use voice.
+
+---
+
+### Step 3 — Document Verification (Check Your Legal Documents)
+
+1. Click **"Verify Document"** from the dashboard or sidebar
+2. **Drag and drop** your document into the upload area, or click to browse
+   - Supported formats: `.txt`, `.pdf`
+3. The AI will scan your document and return a detailed report with:
+   - **HIGH severity** issues (serious legal risks)
+   - **MEDIUM severity** issues (clauses to negotiate)
+   - **LOW severity** issues (minor concerns)
+4. Review each flagged issue to understand the risk before signing
+
+> 💡 **Tip**: Try uploading an employment agreement or rental contract to see it in action.
+
+---
+
+### Step 4 — View Case History
+
+1. Click **"Case History"** from the sidebar
+2. Enter your **User ID** to retrieve your past consultations
+3. Click any case to view the full legal analysis and transcription
 
 ---
 
@@ -105,7 +139,7 @@
 │                         USER INTERFACE                               │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
 │  │ Voice Triage │  │  Document    │  │ Case Memory  │              │
-│  │   (React)    │  │  Upload      │  │   (React)    │              │
+│  │              │  │  Verifier    │  │              │              │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘              │
 └─────────┼──────────────────┼──────────────────┼────────────────────┘
           │                  │                  │
@@ -114,8 +148,7 @@
           ▼                  ▼                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      API GATEWAY (REST)                              │
-│  POST /voice/triage  │  POST /translate/document  │  GET /cases    │
-│  POST /petition/generate  │  POST /petition/clarify                 │
+│  POST /voice/triage  │  POST /validate/document  │  GET /cases     │
 └─────────┬──────────────────┬──────────────────┬────────────────────┘
           │                  │                  │
           ▼                  ▼                  ▼
@@ -123,16 +156,13 @@
 │                      AWS LAMBDA FUNCTIONS                            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
 │  │ Voice Triage │  │  Document    │  │ Case Memory  │              │
-│  │   Lambda     │  │  Translator  │  │   Lambda     │              │
+│  │   Lambda     │  │  Verifier    │  │   Lambda     │              │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘              │
-│         │                  │                  │                      │
-│         │ ┌────────────────┴──────────────────┘                     │
-│         │ │                                                          │
-│         ▼ ▼                                                          │
+│         ▼                  ▼                  │                      │
 │  ┌──────────────────────────────────────────────────────────┐       │
-│  │      AWS Bedrock (Claude 3.5 Sonnet)                    │       │
+│  │      AWS Bedrock (Amazon Nova Lite)                     │       │
 │  │  • Emotion Detection  • Legal Classification             │       │
-│  │  • Fact Extraction    • Petition Generation              │       │
+│  │  • Document Verification  • Risk Analysis                │       │
 │  └──────────────────────────────────────────────────────────┘       │
 └─────────┬──────────────────┬──────────────────┬────────────────────┘
           │                  │                  │
@@ -145,14 +175,13 @@
 │  │  • Metadata  │  │  • Archives  │  │              │              │
 │  └──────────────┘  └──────────────┘  └──────────────┘              │
 └─────────────────────────────────────────────────────────────────────┘
-          │                  │
-          ▼                  ▼
+          │
+          ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                   EXTERNAL SERVICES                                  │
 │  ┌──────────────────────────────────────────────────────┐           │
 │  │  Sarvam AI                                           │           │
 │  │  • Saaras v3 (Speech-to-Text)                       │           │
-│  │  • Mayura v1 (Translation)                          │           │
 │  └──────────────────────────────────────────────────────┘           │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -164,10 +193,8 @@
 | Endpoint | Method | Description | Request Body | Response |
 |----------|--------|-------------|--------------|----------|
 | `/voice/triage` | POST | Analyze transcribed voice input | `{userId, transcribedText, language}` | Emotion, classification, BNS sections |
-| `/translate/document` | POST | Translate legal documents | `{userId, s3Key, sourceLanguage, targetLanguage, documentType}` | Original and translated text |
+| `/validate/document` | POST | Verify legal document for issues | `{fileContent, filename}` | Severity-rated issue list |
 | `/cases` | GET | Fetch user's case history | Query: `?userId={id}&limit={n}` | Array of cases with metadata |
-| `/petition/generate` | POST | Generate legal petition | `{userId, facts, legalCategory, relevantSections}` | Structured petition draft |
-| `/petition/clarify` | POST | Clarify petition details | `{userId, sessionId, question}` | Clarification response |
 
 **Base URL**: `https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod`
 
@@ -181,18 +208,15 @@
 - **Amazon API Gateway**: REST API management
 - **Amazon S3**: Document storage with encryption
 - **Amazon DynamoDB**: NoSQL database for sessions and metadata
-- **AWS Bedrock**: Claude 3.5 Sonnet for legal reasoning
+- **AWS Bedrock**: Amazon Nova Lite for legal reasoning
 - **AWS Textract**: Document text extraction (cross-region)
 
 ### **AI/ML Services**
-- **AWS Bedrock (Claude 3.5 Sonnet)**: 
+- **AWS Bedrock (Amazon Nova Lite)**:
   - Emotion detection and urgency analysis
   - Legal problem classification
-  - Fact extraction
-  - Petition generation
-  - Document verification
+  - Document verification and risk analysis
 - **Sarvam AI Saaras v3**: Indic language speech-to-text
-- **Sarvam AI Mayura v1**: Legal document translation with formal tone
 
 ### **Frontend**
 - **HTML5 + Tailwind CSS**: Responsive UI
@@ -210,10 +234,10 @@
 
 ## 🤔 Why These Services?
 
-### **AWS Bedrock (Claude 3.5 Sonnet)**
-**Advanced Legal Reasoning**
-- **State-of-the-Art Performance**: Claude 3.5 Sonnet excels at complex reasoning and analysis
-- **Long Context Window**: Handles detailed legal documents and multi-turn conversations
+### **AWS Bedrock (Amazon Nova Lite)**
+**Fast & Cost-Effective Legal Reasoning**
+- **No Marketplace Subscription Required**: Nova Lite is available natively in AWS Bedrock with no additional setup
+- **Low Latency**: Optimized for fast inference, ideal for real-time legal triage
 - **Multilingual Support**: Strong performance across English and Indic languages
 - **JSON Mode**: Reliable structured output for legal classifications
 
@@ -223,7 +247,7 @@
 - **Scalability**: Auto-scales with Lambda for any load
 - **Cost-Effective**: Pay-per-use pricing with no minimum commitments
 
-**Why This Matters**: When a user speaks their legal problem, they need accurate, detailed analysis. Claude 3.5 Sonnet provides sophisticated legal reasoning while maintaining fast response times through AWS's infrastructure.
+**Why This Matters**: When a user speaks their legal problem, they need accurate, detailed analysis fast. Amazon Nova Lite provides legal reasoning with minimal latency through AWS's infrastructure.
 
 ---
 
@@ -234,7 +258,6 @@
 - **Code-Mixing Support**: Handles Hinglish and other mixed-language speech patterns common in India
 - **Legal Terminology**: Trained on Indian legal vocabulary and context
 - **Cultural Context**: Understands Indian names, places, and cultural references
-- **Formal Translation**: Mayura v1 provides legal-grade translations with proper formal tone
 
 **Why This Matters**: A farmer in rural Maharashtra speaking Marathi with local dialect needs accurate transcription. Amazon Transcribe's limited Indic support would miss critical details, while Sarvam AI captures every word correctly.
 
@@ -280,16 +303,14 @@
 - **Pre-Signed URLs**: Temporary, secure download links that expire after 1 hour
 - **Versioning**: Keep document history for audit trails
 - **Lifecycle Policies**: Automatically archive old documents to Glacier for cost savings
-- **Cross-Region Replication**: Disaster recovery and low-latency access
 - **99.999999999% Durability**: Your legal documents are safer than on any local server
 
 **Security Features**:
 - **No Public Access**: All documents private by default
 - **IAM Policies**: Fine-grained access control per Lambda function
 - **Audit Logging**: S3 access logs for compliance
-- **Virus Scanning**: Can integrate with AWS Macie for content inspection
 
-**Why This Matters**: A translated legal notice contains sensitive personal information. S3's pre-signed URLs ensure only the authorized user can download it, and the link expires after 1 hour. No risk of documents being shared or leaked.
+**Why This Matters**: A verified legal document contains sensitive personal information. S3's pre-signed URLs ensure only the authorized user can access it, and the link expires after 1 hour.
 
 ---
 
@@ -297,7 +318,7 @@
 
 **Total Monthly Cost Breakdown** (for 10,000 users):
 ```
-AWS Bedrock (Claude 3.5):    ₹2,000  (1M tokens)
+AWS Bedrock (Nova Lite):     ₹2,000  (1M tokens)
 Lambda Execution:            ₹300    (100K invocations)
 DynamoDB:                    ₹500    (10M reads/writes)
 S3 Storage:                  ₹200    (100GB documents)
@@ -336,16 +357,13 @@ TOTAL:                         ₹16,000/month
 
 ### **1. Clone Repository**
 ```bash
-git clone https://github.com/ScaryPython692/Nyaya_Dwarpal.git
-cd Nyaya_Dwarpal
+git clone https://github.com/kalivenkatg/Nyaya-Dwarpal-AI.git
+cd Nyaya-Dwarpal-AI
 ```
 
 ### **2. Install Dependencies**
 ```bash
-# Install Python dependencies
 pip install -r requirements.txt
-
-# Install CDK dependencies
 npm install -g aws-cdk
 ```
 
@@ -362,45 +380,28 @@ npx cdk bootstrap aws://ACCOUNT-ID/ap-south-2
 
 ### **5. Deploy Infrastructure**
 ```bash
-# Synthesize CloudFormation template
 npx cdk synth
-
-# Deploy to AWS
 npx cdk deploy --require-approval never
 ```
 
-### **6. Note the API Endpoint**
-After deployment, CDK will output:
-```
-Outputs:
-NyayaDwarpalStack.ApiEndpoint = https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/
-NyayaDwarpalStack.VoiceTriageEndpoint = https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/voice/triage
-NyayaDwarpalStack.CasesEndpoint = https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/cases
-```
-
-### **7. Open Frontend**
+### **6. Open Frontend**
 ```bash
-# Open the frontend in your browser
-open ui/enhanced-index.html
+open ui/index.html
 ```
-
-The frontend will automatically connect to the deployed API endpoints.
 
 ---
 
 ## 📊 Project Structure
 
 ```
-Nyaya_Dwarpal/
+Nyaya-Dwarpal-AI/
 ├── infrastructure/
 │   └── nyaya_dwarpal_stack.py      # CDK infrastructure definition
 ├── lambda_functions/
 │   ├── voice_triage/
 │   │   └── handler.py               # Voice triage Lambda
-│   ├── document_translator/
-│   │   └── handler.py               # Translation Lambda
-│   ├── petition_architect/
-│   │   └── handler.py               # Petition generation Lambda
+│   ├── document_verifier/
+│   │   └── handler.py               # Document verification Lambda
 │   ├── case_memory/
 │   │   └── handler.py               # Case retrieval Lambda
 │   └── shared/
@@ -408,7 +409,7 @@ Nyaya_Dwarpal/
 │       ├── bedrock_client.py        # Bedrock API wrapper
 │       └── aws_helpers.py           # S3, DynamoDB helpers
 ├── ui/
-│   └── enhanced-index.html          # Frontend application
+│   └── index.html                   # Frontend application
 ├── app.py                           # CDK app entry point
 ├── cdk.json                         # CDK configuration
 ├── requirements.txt                 # Python dependencies
@@ -427,23 +428,6 @@ curl -X POST "https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/voice
     "userId": "test-user-001",
     "transcribedText": "My landlord has not returned my security deposit for 3 months",
     "language": "en"
-  }'
-```
-
-### **Test Document Translation**
-```bash
-# 1. Upload file to S3 bucket
-aws s3 cp test_legal_notice.txt s3://YOUR-BUCKET-NAME/documents/
-
-# 2. Call translation API
-curl -X POST "https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/translate/document" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "userId": "test-user-001",
-    "s3Key": "documents/test_legal_notice.txt",
-    "sourceLanguage": "en",
-    "targetLanguage": "hi",
-    "documentType": "Legal Notice"
   }'
 ```
 
@@ -471,7 +455,7 @@ curl -X GET "https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/cases?
 - **Cost Reduction**: Free legal triage vs ₹500-₹2000 per consultation
 - **Time Savings**: Instant analysis vs days of waiting for lawyer appointments
 - **Reach**: Cloud-based solution accessible from any smartphone
-- **Accuracy**: 85%+ confidence in legal classification using AWS Bedrock (Claude 3.5 Sonnet)
+- **Accuracy**: 85%+ confidence in legal classification using AWS Bedrock (Amazon Nova Lite)
 
 ---
 
@@ -487,12 +471,13 @@ curl -X GET "https://ked0qedvxi.execute-api.ap-south-2.amazonaws.com/prod/cases?
 
 ## 🛣️ Roadmap
 
-- [ ] **Phase 1** (Current): Voice Triage, Document Translation, Case Memory ✅
-- [ ] **Phase 2**: Petition Generation with Citation Verification
-- [ ] **Phase 3**: Legal Library with searchable BNS/BNSS/CPC sections
-- [ ] **Phase 4**: Multi-language UI (Hindi, Tamil, Telugu, Bengali)
-- [ ] **Phase 5**: Mobile app (React Native)
-- [ ] **Phase 6**: Integration with eCourts for direct filing
+- [ ] **Phase 1** (Current): Voice Triage, Document Verification, Case Memory ✅
+- [ ] **Phase 2**: Document Translation (English ↔ Regional Languages)
+- [ ] **Phase 3**: Petition Generation with Citation Verification
+- [ ] **Phase 4**: Legal Library with searchable BNS/BNSS/CPC sections
+- [ ] **Phase 5**: Multi-language UI (Hindi, Tamil, Telugu, Bengali)
+- [ ] **Phase 6**: Mobile app (React Native)
+- [ ] **Phase 7**: Integration with eCourts for direct filing
 
 ---
 
@@ -511,7 +496,7 @@ MIT License - See [LICENSE](LICENSE) file for details
 ## 🙏 Acknowledgments
 
 - **AWS**: For Lambda, S3, DynamoDB, Bedrock, and cloud infrastructure
-- **Sarvam AI**: For Indic language models (Saaras v3, Mayura v1)
+- **Sarvam AI**: For Indic language models (Saaras v3)
 - **AI for Bharat**: For organizing this impactful hackathon
 - **Indian Legal System**: For inspiring us to make justice accessible
 
@@ -520,8 +505,8 @@ MIT License - See [LICENSE](LICENSE) file for details
 ## 📞 Contact
 
 For questions, feedback, or collaboration:
-- **GitHub**: [ScaryPython692/Nyaya_Dwarpal](https://github.com/ScaryPython692/Nyaya_Dwarpal)
-- **Issues**: [Report a bug](https://github.com/ScaryPython692/Nyaya_Dwarpal/issues)
+- **GitHub**: [kalivenkatg/Nyaya-Dwarpal-AI](https://github.com/kalivenkatg/Nyaya-Dwarpal-AI)
+- **Issues**: [Report a bug](https://github.com/kalivenkatg/Nyaya-Dwarpal-AI/issues)
 
 ---
 
@@ -534,4 +519,3 @@ For questions, feedback, or collaboration:
 ![AWS Bedrock](https://img.shields.io/badge/Powered%20by-AWS%20Bedrock-purple)
 ![Sarvam AI](https://img.shields.io/badge/Powered%20by-Sarvam%20AI-blue)
 ![Python](https://img.shields.io/badge/Python-3.11-green)
-
